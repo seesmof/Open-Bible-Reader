@@ -1,0 +1,69 @@
+- verse numbers toggle
+- chapter numbers toggle 
+- space between chapters yes or no 
+- Red Letter toggle #a51d2d
+- Blue Letter toggle #1a5fb4
+- accent color choice
+	-  from![](https://i.imgur.com/wM21v21.png)
+	- accent color would apply to verse numbers, footnote and cross-reference callers, maybe heading colors
+- paragraphs either with vertical spacing inbetween and no indentation or without vertical spacing and with indentations
+- font choice 
+	- a dropdown with headings like serif or arial-like
+	- Times New Roman
+	- Noto Sans
+	- Noto Serif 
+	- Verdana 
+	- Georgia
+	- Cambria 
+	- Arial 
+	- Roboto 
+	- Calibri 
+- show footnotes and cross-references in sidebar, scrolling with the chapters
+- cross-reference callers toggle 
+- footnote callers toggle 
+- headings toggle 
+- referenced passages in `\r` tags toggle 
+- font size slider 
+- justify text toggle 
+- text container width setting 
+- verse by verse toggle 
+- free Bible API
+- navigation with hotkeys 
+- in settings menu the settings would be applied on change and each option would have buttons to restore the setting to defaults
+- in reading screen perhaps a little space at the bottom with a full-width search bar (maybe limit width on larger screens) and left and right arrow buttons to quickly navigate between chapters
+- remember a place where a person last stopped reading 
+- in reading screen a top navbar would have a current Book and Chapter info in `Book_Name Chapter_Number` format and a button to show the sidebar where we would have a search page, a settings page, a reading page and maybe a profile 
+- a profile would store notes and highlights 
+- support verse select and flexible highlighting 
+	- flexible highlighting meaning a user will be able to highlight a selected text, not only a full verse 
+	- with highlighting select some bright colors as options and set the opacity of them to non-full so that they dont get too obstructive 
+- support notes creation based on selected text 
+	- support Markdown in notes 
+- in cross-references, footnotes and notes screen make it one page but just three selectable tabs at the top 
+- fetch the Bible data from somewhere i guess, or not i dont know Daddy Jesus Christ please help Lord GOD ✝️💖🕊️
+- cross-reference passage popup on hover and footnote show on hover and for both on click keep it shown until clicked off
+- at the bottom the search space with the two next and previous buttons add another button just on top of that space, a little downwards chevron to collapse that area. and once its collapsed the chevron is still sticking out so that if clicked again, it will be shown 
+- in the menu do such tabs 
+	- Bible - reading tab where the place last read will be remembered. also add an option to settings to sync formatting settings from search to Bible reading tab 
+	- Search - a search window that would, based on the input, output a verse, a few verses, a range of verses, and same for chapters
+		- once searched, add options to keep reading from that place in the Bible reading tab
+		- while no input, show some random Bible verse where the output should be
+	- History - keeps track of the last actions for easier troubleshooting later and helps to come back to the last read Bible chapter if needed 
+	- Settings - all the possible settings and customization of the app
+		- themes
+			- include sepia theme and also allow for custom themes 
+			- add such default themes: Light, Sepia, Dim
+				- Light would be just black text on white background and maybe gold or something bright like that for accents 
+				- Sepia would be a little easier on the eyes with yellow-ish background and dimmed text, and also a dimmer color for accents
+				- Dim would be a gray-ish background and dimmed text also
+				- Custom would allow the user to customize the colors of the background, text and accents 
+			- add ability to save the created custom theme and add it to the list of themes 
+			- in custom theme settings for accent colors make it collapsible and set just the default value for all and if the user uncollapses the list, it would show indented customization options for color for each kind of accent. same for text customization options
+		- to each tab in settings add a global reset button, and also a save button(even though the settings will be saved on change)
+			- global reset per tab will reset settings for the entire tab 
+			- local reset button or a link would reset the settings of that individiual settings section
+			- and an individual reset button will reset that individual setting option
+	- Highlights - redirect to same page for Highlights, Notes and Saved verses
+- add BSB and KJV translations to the app initially
+- add different languages to the app and an option in the settings to change the language of the interface
+- in serach accept all possible Bible Book names from Ukrainian and English
