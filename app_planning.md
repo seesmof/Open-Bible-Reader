@@ -4,7 +4,7 @@
 - Red Letter toggle #a51d2d
 - Blue Letter toggle #1a5fb4
 - accent color choice
-	-  from![](https://i.imgur.com/wM21v21.png)
+	-  from ![](https://i.imgur.com/wM21v21.png)
 	- accent color would apply to verse numbers, footnote and cross-reference callers, maybe heading colors
 - paragraphs either with vertical spacing inbetween and no indentation or without vertical spacing and with indentations
 - font choice 

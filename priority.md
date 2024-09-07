@@ -1,0 +1,1 @@
+each verse on a line, selectable with crossreferences that are links
