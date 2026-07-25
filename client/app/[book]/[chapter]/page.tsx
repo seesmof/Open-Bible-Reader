@@ -1,5 +1,6 @@
 "use client";
 
+import { BookToUkrainianName } from "@/lib/utils";
 import { use, useEffect, useState } from "react";
 
 export interface Verse {
@@ -38,7 +39,14 @@ export default function ChapterPage({
     return (
       <div className="p-3">
         {data.map((verse, index) => (
-          <p key={index}>
+          <p
+            key={index}
+            onClick={() =>
+              navigator.clipboard.writeText(
+                `${verse.verse} (${BookToUkrainianName[book]} ${chapterNumber}:${verse.number})`,
+              )
+            }
+          >
             <small>{verse.number} </small>
             <span>{verse.verse}</span>
           </p>
