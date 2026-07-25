@@ -1,6 +1,7 @@
 "use client";
 
-import { BookToUkrainianName } from "@/lib/utils";
+import { BookToNumberOfChapters, BookToUkrainianName } from "@/lib/utils";
+import { redirect } from "next/navigation";
 import { use, useEffect, useState } from "react";
 
 export interface Verse {
@@ -34,6 +35,28 @@ export default function ChapterPage({
     fetchChapter();
   }, []);
 
+  const navgiateToPreviousChapter = () => {
+    let prevChapter, prevBook;
+
+    if (chapterNumber === 1) {
+      const keys = Object.keys(BookToNumberOfChapters);
+      const bookIndex = keys.indexOf(book);
+
+      if (bookIndex <= 0) {
+        prevBook = keys[keys.length - 1];
+      } else {
+        prevBook = keys[bookIndex - 1];
+      }
+
+      prevChapter = BookToNumberOfChapters[prevBook];
+    } else {
+      prevChapter = chapterNumber - 1;
+      prevBook = book;
+    }
+
+    redirect(`/${prevBook}/${prevChapter}`);
+  };
+
   if (isLoading) return <p className="p-3">Завантаження розділу Біблії...</p>;
   else {
     return (
@@ -54,7 +77,10 @@ export default function ChapterPage({
           ))}
         </div>
         <div className="px-3 flex justify-between">
-          <button className="hover:underline underline-offset-4 cursor-pointer text-sm">
+          <button
+            onClick={navgiateToPreviousChapter}
+            className="hover:underline underline-offset-4 cursor-pointer text-sm"
+          >
             Попередній
           </button>
           <button className="hover:underline underline-offset-4 cursor-pointer text-sm">
