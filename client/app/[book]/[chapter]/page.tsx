@@ -57,6 +57,13 @@ export default function ChapterPage({
 
     if (chapterNumber === maxChapter) {
       const keys = Object.keys(BookToNumberOfChapters);
+      const index = keys.indexOf(book);
+      console.log(index);
+      if (index === 65) nextBook = "GEN";
+      nextChapter = 1;
+    } else {
+      nextChapter = chapterNumber + 1;
+      nextBook = book;
     }
 
     redirect(`/${nextBook}/${nextChapter}`);
