@@ -40,21 +40,24 @@ export default function ChapterPage({
 
     if (chapterNumber === 1) {
       const keys = Object.keys(BookToNumberOfChapters);
-      const bookIndex = keys.indexOf(book);
-
-      if (bookIndex <= 0) {
-        prevBook = keys[keys.length - 1];
-      } else {
-        prevBook = keys[bookIndex - 1];
-      }
-
-      prevChapter = BookToNumberOfChapters[prevBook];
+      console.log(keys);
     } else {
       prevChapter = chapterNumber - 1;
       prevBook = book;
     }
 
     redirect(`/${prevBook}/${prevChapter}`);
+  };
+
+  const navgiateToNextChapter = () => {
+    let nextChapter, nextBook;
+    const maxChapter = BookToNumberOfChapters[book];
+
+    if (chapterNumber === maxChapter) {
+      const keys = Object.keys(BookToNumberOfChapters);
+    }
+
+    redirect(`/${nextBook}/${nextChapter}`);
   };
 
   if (isLoading) return <p className="p-3">Завантаження розділу Біблії...</p>;
@@ -83,7 +86,10 @@ export default function ChapterPage({
           >
             Попередній
           </button>
-          <button className="hover:underline underline-offset-4 cursor-pointer text-sm">
+          <button
+            onClick={navgiateToNextChapter}
+            className="hover:underline underline-offset-4 cursor-pointer text-sm"
+          >
             Наступний
           </button>
         </div>
