@@ -1,8 +1,8 @@
 "use client";
 
 import { BookToNumberOfChapters, BookToUkrainianName } from "@/lib/utils";
-import { redirect } from "next/navigation";
 import { use, useEffect, useState } from "react";
+import { redirect } from "next/navigation";
 
 export interface Verse {
   number: number;
@@ -20,14 +20,13 @@ export default function ChapterPage({
   const chapterNumber = Number(chapter);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [data, setData] = useState<Verse[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchChapter = async () => {
       setIsLoading(true);
       const response = await fetch(`${apiUrl}/${book}/${chapterNumber}`);
-
       if (!response.ok) throw new Error("Failed to fetch a chapter");
-
       const data: Verse[] = await response.json();
       setData(data);
       setIsLoading(false);
@@ -88,7 +87,7 @@ export default function ChapterPage({
             </p>
           ))}
         </div>
-        <div className="px-3 flex justify-between">
+        <div className="px-3 flex justify-between fixed bottom-0 bg-white w-full">
           <button
             onClick={navgiateToPreviousChapter}
             className="hover:underline underline-offset-4 cursor-pointer text-sm"
@@ -96,11 +95,26 @@ export default function ChapterPage({
             Попередній
           </button>
           <button
+            onClick={() => setIsModalOpen((isModalOpen) => !isModalOpen)}
+            className="hover:underline underline-offset-4 cursor-pointer text-sm"
+          >
+            Розділ
+          </button>
+          <button
             onClick={navgiateToNextChapter}
             className="hover:underline underline-offset-4 cursor-pointer text-sm"
           >
             Наступний
           </button>
+        </div>
+        <div
+          className={`${isModalOpen ? "fixed" : "hidden"} bg-black/50 h-screen w-full flex items-center justify-center`}
+        >
+          <div className="bg-white rounded-md p-3 flex flex-col">
+            <button className="self-end" onClick={() => setIsModalOpen(false)}>
+              Закрити
+            </button>
+          </div>
         </div>
       </>
     );
