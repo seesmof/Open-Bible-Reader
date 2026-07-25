@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 
 export interface Verse {
   number: number;
@@ -16,10 +16,34 @@ export default function ChapterPage({
 }) {
   const { book, chapter } = use(params);
   const chapterNumber = Number(chapter);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [data, setData] = useState<Verse[]>([]);
 
-  return (
-    <div className="p-3">
-      {book} and {chapterNumber}
-    </div>
-  );
+  useEffect(() => {
+    const fetchChapter = async () => {
+      setIsLoading(true);
+      const response = await fetch(`${apiUrl}/${book}/${chapterNumber}`);
+
+      if (!response.ok) throw new Error("Failed to fetch a chapter");
+
+      const data: Verse[] = await response.json();
+      setData(data);
+      setIsLoading(false);
+    };
+    fetchChapter();
+  }, []);
+
+  if (isLoading) return <p className="p-3">Завантаження розділу Біблії...</p>;
+  else {
+    return (
+      <div className="p-3">
+        {data.map((verse, index) => (
+          <p key={index}>
+            <small>{verse.number} </small>
+            <span>{verse.verse}</span>
+          </p>
+        ))}
+      </div>
+    );
+  }
 }
