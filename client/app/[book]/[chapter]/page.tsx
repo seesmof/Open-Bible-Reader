@@ -40,7 +40,9 @@ export default function ChapterPage({
 
     if (chapterNumber === 1) {
       const keys = Object.keys(BookToNumberOfChapters);
-      console.log(keys);
+      const index = keys.indexOf(book);
+      if (index === 0) prevBook = "REV";
+      prevChapter = BookToNumberOfChapters[prevBook];
     } else {
       prevChapter = chapterNumber - 1;
       prevBook = book;
