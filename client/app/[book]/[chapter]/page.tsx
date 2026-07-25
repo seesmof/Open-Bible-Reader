@@ -37,21 +37,31 @@ export default function ChapterPage({
   if (isLoading) return <p className="p-3">Завантаження розділу Біблії...</p>;
   else {
     return (
-      <div className="p-3">
-        {data.map((verse, index) => (
-          <p
-            key={index}
-            onClick={() =>
-              navigator.clipboard.writeText(
-                `${verse.verse} (${BookToUkrainianName[book]} ${chapterNumber}:${verse.number})`,
-              )
-            }
-          >
-            <small>{verse.number} </small>
-            <span>{verse.verse}</span>
-          </p>
-        ))}
-      </div>
+      <>
+        <div className="p-3">
+          {data.map((verse, index) => (
+            <p
+              key={index}
+              onClick={() =>
+                navigator.clipboard.writeText(
+                  `${verse.verse} (${BookToUkrainianName[book]} ${chapterNumber}:${verse.number})`,
+                )
+              }
+            >
+              <small>{verse.number} </small>
+              <span>{verse.verse}</span>
+            </p>
+          ))}
+        </div>
+        <div className="px-3 flex justify-between">
+          <button className="hover:underline underline-offset-4 cursor-pointer text-sm">
+            Попередній
+          </button>
+          <button className="hover:underline underline-offset-4 cursor-pointer text-sm">
+            Наступний
+          </button>
+        </div>
+      </>
     );
   }
 }
