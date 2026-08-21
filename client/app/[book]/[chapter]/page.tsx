@@ -58,7 +58,7 @@ export default function ChapterPage({
     redirect(`/${nextBook}/${nextChapter}`);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key == "ArrowLeft") navgiateToPreviousChapter();
     else if (e.key == "ArrowRight") navgiateToNextChapter();
   };
