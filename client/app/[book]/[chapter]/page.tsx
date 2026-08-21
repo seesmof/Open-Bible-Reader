@@ -41,7 +41,8 @@ export default function ChapterPage({
       const keys = Object.keys(BookToNumberOfChapters);
       const index = keys.indexOf(book);
       if (index === 0) prevBook = "REV";
-      prevChapter = BookToNumberOfChapters[prevBook];
+      prevChapter =
+        BookToNumberOfChapters[prevBook as keyof typeof BookToNumberOfChapters];
     } else {
       prevChapter = chapterNumber - 1;
       prevBook = book;
@@ -52,7 +53,8 @@ export default function ChapterPage({
 
   const navgiateToNextChapter = () => {
     let nextChapter, nextBook;
-    const maxChapter = BookToNumberOfChapters[book];
+    const maxChapter =
+      BookToNumberOfChapters[book as keyof typeof BookToNumberOfChapters];
 
     if (chapterNumber === maxChapter) {
       const keys = Object.keys(BookToNumberOfChapters);
@@ -72,13 +74,13 @@ export default function ChapterPage({
   else {
     return (
       <>
-        <div className="p-3">
+        <div className="p-3 mb-3">
           {data.map((verse, index) => (
             <p
               key={index}
               onClick={() =>
                 navigator.clipboard.writeText(
-                  `${verse.verse} (${BookToUkrainianName[book]} ${chapterNumber}:${verse.number})`,
+                  `${verse.verse} (${BookToUkrainianName[book as keyof typeof BookToUkrainianName]} ${chapterNumber}:${verse.number})`,
                 )
               }
             >
