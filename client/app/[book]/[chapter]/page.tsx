@@ -1,7 +1,7 @@
 "use client";
 
 import { BookToNumberOfChapters, BookToUkrainianName } from "@/lib/utils";
-import { use, useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 
 export interface Verse {
@@ -21,18 +21,6 @@ export default function ChapterPage({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [data, setData] = useState<Verse[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    const fetchChapter = async () => {
-      setIsLoading(true);
-      const response = await fetch(`${apiUrl}/${book}/${chapterNumber}`);
-      if (!response.ok) throw new Error("Failed to fetch a chapter");
-      const data: Verse[] = await response.json();
-      setData(data);
-      setIsLoading(false);
-    };
-    fetchChapter();
-  }, []);
 
   const navgiateToPreviousChapter = () => {
     let prevChapter, prevBook;
@@ -70,6 +58,25 @@ export default function ChapterPage({
     redirect(`/${nextBook}/${nextChapter}`);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key == "ArrowLeft") navgiateToPreviousChapter();
+    else if (e.key == "ArrowRight") navgiateToNextChapter();
+  };
+
+  useEffect(() => {
+    const fetchChapter = async () => {
+      setIsLoading(true);
+      const response = await fetch(`${apiUrl}/${book}/${chapterNumber}`);
+      if (!response.ok) throw new Error("Failed to fetch a chapter");
+      const data: Verse[] = await response.json();
+      setData(data);
+      setIsLoading(false);
+    };
+    fetchChapter();
+    addEventListener("keydown", handleKeyDown);
+    return () => removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   if (isLoading) return <p className="p-3">Завантаження розділу Біблії...</p>;
   else {
     return (
@@ -96,12 +103,14 @@ export default function ChapterPage({
           >
             Попередній
           </button>
+          {/* 
           <button
             onClick={() => setIsModalOpen((isModalOpen) => !isModalOpen)}
             className="hover:underline underline-offset-4 cursor-pointer text-sm"
           >
             Розділ
           </button>
+           */}
           <button
             onClick={navgiateToNextChapter}
             className="hover:underline underline-offset-4 cursor-pointer text-sm"
