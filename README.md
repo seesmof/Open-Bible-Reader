@@ -8,3 +8,7 @@
 
 **Be diligent to present yourself approved to God as a worker who does not need to be ashamed, accurately handling the word of truth.**
 – [2 Timothy 2:15](https://www.biblegateway.com/passage/?search=2+Timothy+2%3A15&version=NASB,KJV)
+
+## Links
+
+<a href="https://www.flaticon.com/free-icons/bible" title="bible icons">Bible icons created by Superarticons - Flaticon</a>
