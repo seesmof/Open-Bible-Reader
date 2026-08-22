@@ -101,7 +101,7 @@ export default function ChapterPage({
   else {
     return (
       <>
-        <main className="p-3 mb-3">
+        <main className="p-3 mb-8">
           <h1 className="font-bold">
             {BibleBooksData.find((b) => b.abbrEng === book)?.nameUkr}{" "}
             {chapterNumber}
