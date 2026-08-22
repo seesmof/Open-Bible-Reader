@@ -123,19 +123,19 @@ export default function ChapterPage({
         <aside className="flex justify-between fixed bottom-0 bg-white w-full">
           <button
             onClick={navgiateToPreviousChapter}
-            className="hover:underline underline-offset-4 cursor-pointer sm:text-sm py-2 sm:py-0 px-3"
+            className="hover:underline underline-offset-4 cursor-pointer sm:text-sm w-full py-2 sm:py-0 px-3 text-start"
           >
             Попередній
           </button>
           <button
             onClick={() => setIsModalOpen((isModalOpen) => !isModalOpen)}
-            className="hover:underline underline-offset-4 cursor-pointer sm:text-sm py-2 sm:py-0 px-3"
+            className="hover:underline underline-offset-4 cursor-pointer sm:text-sm w-full py-2 sm:py-0 px-3"
           >
             Розділ
           </button>
           <button
             onClick={navgiateToNextChapter}
-            className="hover:underline underline-offset-4 cursor-pointer sm:text-sm py-2 sm:py-0 px-3"
+            className="hover:underline underline-offset-4 cursor-pointer sm:text-sm w-full py-2 sm:py-0 px-3 text-end"
           >
             Наступний
           </button>
