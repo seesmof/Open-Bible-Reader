@@ -102,6 +102,10 @@ export default function ChapterPage({
     return (
       <>
         <main className="p-3 mb-3">
+          <h1 className="font-bold">
+            {BibleBooksData.find((b) => b.abbrEng === book)?.nameUkr}{" "}
+            {chapterNumber}
+          </h1>
           {verses.map((verse, index) => (
             <p
               key={index}
