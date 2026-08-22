@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function IndexPage() {
-  redirect("/GEN/1");
+  redirect("/JHN/3");
 }
