@@ -177,6 +177,7 @@ export default function ChapterPage({
                   Назад
                 </button>
               )}
+              <p className="font-bold">{selectedBook?.nameUkr}</p>
               <button
                 className="self-end hover:underline underline-offset-4 cursor-pointer"
                 onClick={() => {
