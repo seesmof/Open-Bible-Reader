@@ -15,7 +15,7 @@ export const CATEGORY_COLORS: Record<Category, string> = {
   [Category.Pentateuch]: "bg-red-800 hover:bg-red-900",
   [Category.History]: "bg-amber-800 hover:bg-amber-900",
   [Category.Wisdom]: "bg-orange-800 hover:bg-orange-900",
-  [Category.MajorProphets]: "bg-teal-800 hover:bg-teal-900",
+  [Category.MajorProphets]: "bg-pink-800 hover:bg-pink-900",
   [Category.MinorProphets]: "bg-emerald-800 hover:bg-emerald-900",
   [Category.Gospels]: "bg-violet-800 hover:bg-violet-900",
   [Category.Acts]: "bg-indigo-800 hover:bg-indigo-900",

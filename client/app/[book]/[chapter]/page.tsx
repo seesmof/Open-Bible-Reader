@@ -3,7 +3,13 @@
 import { BookToNumberOfChapters, BookToUkrainianName } from "@/lib/utils";
 import React, { use, useEffect, useState } from "react";
 import { redirect } from "next/navigation";
-import { BibleBooksData, Category, CATEGORY_COLORS } from "@/data/Bible";
+import {
+  BibleBook,
+  BibleBooksData,
+  Category,
+  CATEGORY_COLORS,
+} from "@/data/Bible";
+import Link from "next/link";
 
 export interface Verse {
   number: number;
@@ -21,7 +27,9 @@ export default function ChapterPage({
   const chapterNumber = Number(chapter);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [verses, setVerses] = useState<Verse[]>([]);
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedBook, setSelectedBook] = useState<BibleBook | null>(null);
 
   const navgiateToPreviousChapter = () => {
     let prevChapter, prevBook;
@@ -122,21 +130,45 @@ export default function ChapterPage({
         >
           <div className="bg-white rounded-md p-3 flex flex-col">
             <div className="grid grid-cols-6 gap-1">
-              {BibleBooksData.map((Book, index) => (
-                <div
-                  className={`aspect-square cursor-pointer p-1 flex items-center justify-center rounded-md text-white ${CATEGORY_COLORS[Book.category] ?? ""}`}
-                  key={index}
-                >
-                  {Book.abbrUkrainian}
-                </div>
-              ))}
+              {!selectedBook
+                ? BibleBooksData.map((Book, index) => (
+                    <div
+                      className={`aspect-square cursor-pointer p-1 flex items-center justify-center rounded-md text-white ${CATEGORY_COLORS[Book.category] ?? ""}`}
+                      key={index}
+                      onClick={() => setSelectedBook(Book)}
+                    >
+                      {Book.abbrUkrainian}
+                    </div>
+                  ))
+                : Array.from(
+                    { length: selectedBook.numberOfChapters },
+                    (_, index) => index + 1,
+                  ).map((chapter, index) => (
+                    <Link
+                      key={index}
+                      className="aspect-square text-white bg-sky-800 hover:bg-sky-900 cursor-pointer p-1 flex items-center justify-center rounded-md"
+                      href={`/${selectedBook.abbrEnglish}/${chapter}`}
+                    >
+                      {chapter}
+                    </Link>
+                  ))}
             </div>
-            <button
-              className="self-end hover:underline underline-offset-4 mt-4 cursor-pointer"
-              onClick={() => setIsModalOpen(false)}
-            >
-              Закрити
-            </button>
+            <div className="flex justify-between items-center mt-4">
+              {selectedBook && (
+                <button
+                  className="hover:underline underline-offset-4 cursor-pointer"
+                  onClick={() => setSelectedBook(null)}
+                >
+                  Назад
+                </button>
+              )}
+              <button
+                className="self-end hover:underline underline-offset-4 cursor-pointer"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Закрити
+              </button>
+            </div>
           </div>
         </div>
       </>
