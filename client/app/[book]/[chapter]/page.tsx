@@ -77,7 +77,10 @@ export default function ChapterPage({
     if (e.key == "ArrowLeft") navgiateToPreviousChapter();
     else if (e.key == "ArrowRight") navgiateToNextChapter();
     else if (e.key == "c") setIsModalOpen((isModalOpen) => !isModalOpen);
-    else if (e.key == "Escape") setIsModalOpen(false);
+    else if (e.key == "Escape") {
+      setIsModalOpen(false);
+      setSelectedBook(null);
+    }
   };
 
   useEffect(() => {
@@ -98,7 +101,7 @@ export default function ChapterPage({
   else {
     return (
       <>
-        <div className="p-3 mb-3">
+        <main className="p-3 mb-3">
           {verses.map((verse, index) => (
             <p
               key={index}
@@ -112,8 +115,8 @@ export default function ChapterPage({
               <span>{verse.verse}</span>
             </p>
           ))}
-        </div>
-        <div className="px-3 flex justify-between fixed bottom-0 bg-white w-full">
+        </main>
+        <aside className="px-3 flex justify-between fixed bottom-0 bg-white w-full">
           <button
             onClick={navgiateToPreviousChapter}
             className="hover:underline underline-offset-4 cursor-pointer text-sm"
@@ -132,7 +135,7 @@ export default function ChapterPage({
           >
             Наступний
           </button>
-        </div>
+        </aside>
         <div
           className={`${isModalOpen ? "fixed" : "hidden"} bg-black/50 h-screen w-full flex items-center justify-center`}
         >
@@ -172,7 +175,10 @@ export default function ChapterPage({
               )}
               <button
                 className="self-end hover:underline underline-offset-4 cursor-pointer"
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setSelectedBook(null);
+                }}
               >
                 Закрити
               </button>
