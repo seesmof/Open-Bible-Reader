@@ -76,8 +76,10 @@ export default function ChapterPage({
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key == "ArrowLeft") navgiateToPreviousChapter();
     else if (e.key == "ArrowRight") navgiateToNextChapter();
-    else if (e.key == "s") setIsModalOpen((isModalOpen) => !isModalOpen);
-    else if (e.key == "Escape") {
+    else if (e.key == "s") {
+      setIsModalOpen((isModalOpen) => !isModalOpen);
+      setSelectedBook(null);
+    } else if (e.key == "Escape") {
       setIsModalOpen(false);
       setSelectedBook(null);
     }
