@@ -19,7 +19,7 @@ export default function ChapterPage({
   const { book, chapter } = use(params);
   const chapterNumber = Number(chapter);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [data, setData] = useState<Verse[]>([]);
+  const [verses, setVerses] = useState<Verse[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const navgiateToPreviousChapter = () => {
@@ -69,7 +69,7 @@ export default function ChapterPage({
       const response = await fetch(`${apiUrl}/${book}/${chapterNumber}`);
       if (!response.ok) throw new Error("Failed to fetch a chapter");
       const data: Verse[] = await response.json();
-      setData(data);
+      setVerses(data);
       setIsLoading(false);
     };
     fetchChapter();
@@ -82,7 +82,7 @@ export default function ChapterPage({
     return (
       <>
         <div className="p-3 mb-3">
-          {data.map((verse, index) => (
+          {verses.map((verse, index) => (
             <p
               key={index}
               onClick={() =>
@@ -103,14 +103,12 @@ export default function ChapterPage({
           >
             Попередній
           </button>
-          {/* 
           <button
             onClick={() => setIsModalOpen((isModalOpen) => !isModalOpen)}
             className="hover:underline underline-offset-4 cursor-pointer text-sm"
           >
             Розділ
           </button>
-           */}
           <button
             onClick={navgiateToNextChapter}
             className="hover:underline underline-offset-4 cursor-pointer text-sm"
@@ -122,6 +120,7 @@ export default function ChapterPage({
           className={`${isModalOpen ? "fixed" : "hidden"} bg-black/50 h-screen w-full flex items-center justify-center`}
         >
           <div className="bg-white rounded-md p-3 flex flex-col">
+            <div className="grid grid-cols-6"></div>
             <button className="self-end" onClick={() => setIsModalOpen(false)}>
               Закрити
             </button>
