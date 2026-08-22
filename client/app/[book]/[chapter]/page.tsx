@@ -1,14 +1,8 @@
 "use client";
 
-import { BookToNumberOfChapters, BookToUkrainianName } from "@/lib/utils";
-import React, { use, useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { redirect } from "next/navigation";
-import {
-  BibleBook,
-  BibleBooksData,
-  Category,
-  CATEGORY_COLORS,
-} from "@/data/Bible";
+import { BibleBook, BibleBooksData, CATEGORY_COLORS } from "@/data/Bible";
 import Link from "next/link";
 
 export interface Verse {
@@ -25,6 +19,7 @@ export default function ChapterPage({
 }) {
   const { book, chapter } = use(params);
   const chapterNumber = Number(chapter);
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [verses, setVerses] = useState<Verse[]>([]);
 
@@ -33,13 +28,19 @@ export default function ChapterPage({
 
   const navgiateToPreviousChapter = () => {
     let prevChapter, prevBook;
+    const currentBookIndex = BibleBooksData.findIndex(
+      (b) => b.abbrEng === book,
+    );
 
     if (chapterNumber === 1) {
-      const keys = Object.keys(BookToNumberOfChapters);
-      const index = keys.indexOf(book);
-      if (index === 0) prevBook = "REV";
-      prevChapter =
-        BookToNumberOfChapters[prevBook as keyof typeof BookToNumberOfChapters];
+      const prevBookObject = BibleBooksData[currentBookIndex - 1];
+
+      if (!prevBookObject) prevBook = BibleBooksData[65]?.abbrEng;
+      else prevBook = prevBookObject?.abbrEng;
+
+      prevChapter = BibleBooksData.find(
+        (b) => b.abbrEng === book,
+      )?.numberOfChapters;
     } else {
       prevChapter = chapterNumber - 1;
       prevBook = book;
@@ -50,14 +51,19 @@ export default function ChapterPage({
 
   const navgiateToNextChapter = () => {
     let nextChapter, nextBook;
-    const maxChapter =
-      BookToNumberOfChapters[book as keyof typeof BookToNumberOfChapters];
+    const maxChapter = BibleBooksData.find(
+      (b) => b.abbrEng === book,
+    )?.numberOfChapters;
+    const currentBookIndex = BibleBooksData.findIndex(
+      (b) => b.abbrEng === book,
+    );
 
     if (chapterNumber === maxChapter) {
-      const keys = Object.keys(BookToNumberOfChapters);
-      const index = keys.indexOf(book);
-      console.log(index);
-      if (index === 65) nextBook = "GEN";
+      const nextBookObject = BibleBooksData[currentBookIndex + 1];
+
+      if (!nextBookObject) nextBook = BibleBooksData[0]?.abbrEng;
+      else nextBook = nextBookObject?.abbrEng;
+
       nextChapter = 1;
     } else {
       nextChapter = chapterNumber + 1;
@@ -71,6 +77,7 @@ export default function ChapterPage({
     if (e.key == "ArrowLeft") navgiateToPreviousChapter();
     else if (e.key == "ArrowRight") navgiateToNextChapter();
     else if (e.key == "c") setIsModalOpen((isModalOpen) => !isModalOpen);
+    else if (e.key == "Escape") setIsModalOpen(false);
   };
 
   useEffect(() => {
@@ -97,7 +104,7 @@ export default function ChapterPage({
               key={index}
               onClick={() =>
                 navigator.clipboard.writeText(
-                  `${verse.verse} (${BookToUkrainianName[book as keyof typeof BookToUkrainianName]} ${chapterNumber}:${verse.number})`,
+                  `${verse.verse} (${BibleBooksData.find((b) => b.abbrEng === book)?.nameUkr} ${chapterNumber}:${verse.number})`,
                 )
               }
             >
@@ -138,7 +145,7 @@ export default function ChapterPage({
                       key={index}
                       onClick={() => setSelectedBook(Book)}
                     >
-                      {Book.abbrUkrainian}
+                      {Book.abbrUkr}
                     </div>
                   ))
                 : Array.from(
@@ -148,7 +155,7 @@ export default function ChapterPage({
                     <Link
                       key={index}
                       className="aspect-square text-white bg-sky-800 hover:bg-sky-900 cursor-pointer p-1 flex items-center justify-center rounded-md"
-                      href={`/${selectedBook.abbrEnglish}/${chapter}`}
+                      href={`/${selectedBook.abbrEng}/${chapter}`}
                     >
                       {chapter}
                     </Link>
