@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bible App",
-  description: "This is a very simple Bible app.",
+  title: "Читалка Біблії",
+  description:
+    "Це є дуже простий застосунок для читання Біблії в перекладі Пантелеймона Куліша.",
 };
 
 export default function RootLayout({
