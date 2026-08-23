@@ -95,9 +95,14 @@ export default function ChapterPage({
       setIsLoading(false);
     };
     fetchChapter();
+
     addEventListener("keydown", handleKeyDown);
     return () => removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  useEffect(() => {
+    document.title = `${BibleBooksData.find((b) => b.abbrEng === book)?.nameUkr} ${chapterNumber}`;
+  }, [verses]);
 
   if (isLoading) return <p className="p-3">Завантаження розділу Біблії...</p>;
   else {
