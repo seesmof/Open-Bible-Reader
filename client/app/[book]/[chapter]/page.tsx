@@ -149,10 +149,10 @@ export default function ChapterPage({
           </button>
         </aside>
         <div
-          className={`${isModalOpen ? "fixed" : "hidden"} bg-black/50 h-screen w-full flex items-center justify-center`}
+          className={`${isModalOpen ? "fixed" : "hidden"} inset-0 bg-black/50 flex items-center justify-center`}
         >
-          <div className="bg-white rounded-md p-3 flex flex-col">
-            <div className="grid grid-cols-6 gap-1">
+          <div className="bg-white rounded-md p-3 flex flex-col max-h-[90vh] max-w-full overflow-hidden">
+            <div className="grid grid-cols-6 gap-1 overflow-y-auto">
               {!selectedBook
                 ? BibleBooksData.map((Book, index) => (
                     <div
@@ -176,7 +176,7 @@ export default function ChapterPage({
                     </Link>
                   ))}
             </div>
-            <div className="flex justify-between items-center mt-4">
+            <div className="flex justify-between items-center mt-4 shrink-0">
               {selectedBook && (
                 <button
                   className="hover:underline underline-offset-4 cursor-pointer"
