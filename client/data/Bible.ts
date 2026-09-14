@@ -12,16 +12,16 @@ export enum Category {
 }
 
 export const CATEGORY_COLORS: Record<Category, string> = {
-  [Category.Pentateuch]: "bg-red-800 hover:bg-red-900",
-  [Category.History]: "bg-amber-800 hover:bg-amber-900",
-  [Category.Wisdom]: "bg-orange-800 hover:bg-orange-900",
-  [Category.MajorProphets]: "bg-pink-800 hover:bg-pink-900",
-  [Category.MinorProphets]: "bg-emerald-800 hover:bg-emerald-900",
-  [Category.Gospels]: "bg-violet-800 hover:bg-violet-900",
-  [Category.Acts]: "bg-indigo-800 hover:bg-indigo-900",
-  [Category.PaulineEpistles]: "bg-blue-800 hover:bg-blue-900",
-  [Category.GeneralEpistles]: "bg-lime-800 hover:bg-lime-900",
-  [Category.Revelation]: "bg-purple-800 hover:bg-purple-900",
+  [Category.Pentateuch]: "bg-red-700 hover:bg-red-800",
+  [Category.History]: "bg-orange-700 hover:bg-orange-800",
+  [Category.Wisdom]: "bg-yellow-600 hover:bg-yellow-700",
+  [Category.MajorProphets]: "bg-teal-700 hover:bg-teal-800",
+  [Category.MinorProphets]: "bg-green-700 hover:bg-green-800",
+  [Category.Gospels]: "bg-cyan-700 hover:bg-cyan-800",
+  [Category.Acts]: "bg-sky-700 hover:bg-sky-800",
+  [Category.PaulineEpistles]: "bg-blue-700 hover:bg-blue-800",
+  [Category.GeneralEpistles]: "bg-fuchsia-700 hover:bg-fuchsia-800",
+  [Category.Revelation]: "bg-purple-700 hover:bg-purple-800",
 };
 
 export type BibleBook = {

@@ -169,7 +169,7 @@ export default function ChapterPage({
                   ).map((chapter, index) => (
                     <Link
                       key={index}
-                      className="aspect-square w-10 text-white bg-sky-800 hover:bg-sky-900 cursor-pointer p-1 flex items-center justify-center rounded-md"
+                      className="aspect-square w-10 text-white bg-sky-700 hover:bg-sky-800 cursor-pointer p-1 flex items-center justify-center rounded-md"
                       href={`/${selectedBook.abbrEng}/${chapter}`}
                     >
                       {chapter}
