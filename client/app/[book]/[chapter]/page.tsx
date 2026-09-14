@@ -19,6 +19,7 @@ export default function ChapterPage({
 }) {
   const { book, chapter } = use(params);
   const chapterNumber = Number(chapter);
+  const bookName = book.toUpperCase();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [verses, setVerses] = useState<Verse[]>([]);
@@ -29,7 +30,7 @@ export default function ChapterPage({
   const navgiateToPreviousChapter = () => {
     let prevChapter, prevBook;
     const currentBookIndex = BibleBooksData.findIndex(
-      (b) => b.abbrEng === book,
+      (b) => b.abbrEng === bookName,
     );
 
     if (chapterNumber === 1) {
@@ -39,11 +40,11 @@ export default function ChapterPage({
       else prevBook = prevBookObject?.abbrEng;
 
       prevChapter = BibleBooksData.find(
-        (b) => b.abbrEng === book,
+        (b) => b.abbrEng === bookName,
       )?.numberOfChapters;
     } else {
       prevChapter = chapterNumber - 1;
-      prevBook = book;
+      prevBook = bookName;
     }
 
     redirect(`/${prevBook}/${prevChapter}`);
@@ -52,10 +53,10 @@ export default function ChapterPage({
   const navgiateToNextChapter = () => {
     let nextChapter, nextBook;
     const maxChapter = BibleBooksData.find(
-      (b) => b.abbrEng === book,
+      (b) => b.abbrEng === bookName,
     )?.numberOfChapters;
     const currentBookIndex = BibleBooksData.findIndex(
-      (b) => b.abbrEng === book,
+      (b) => b.abbrEng === bookName,
     );
 
     if (chapterNumber === maxChapter) {
@@ -67,7 +68,7 @@ export default function ChapterPage({
       nextChapter = 1;
     } else {
       nextChapter = chapterNumber + 1;
-      nextBook = book;
+      nextBook = bookName;
     }
 
     redirect(`/${nextBook}/${nextChapter}`);
@@ -88,7 +89,7 @@ export default function ChapterPage({
   useEffect(() => {
     const fetchChapter = async () => {
       setIsLoading(true);
-      const response = await fetch(`${apiUrl}/${book}/${chapterNumber}`);
+      const response = await fetch(`${apiUrl}/${bookName}/${chapterNumber}`);
       if (!response.ok) throw new Error("Failed to fetch a chapter");
       const data: Verse[] = await response.json();
       setVerses(data);
@@ -101,7 +102,7 @@ export default function ChapterPage({
   }, []);
 
   useEffect(() => {
-    document.title = `${BibleBooksData.find((b) => b.abbrEng === book)?.nameUkr} ${chapterNumber}`;
+    document.title = `${BibleBooksData.find((b) => b.abbrEng === bookName)?.nameUkr} ${chapterNumber}`;
   }, [verses]);
 
   if (isLoading) return <p className="p-3">Завантаження розділу Біблії...</p>;
@@ -110,7 +111,7 @@ export default function ChapterPage({
       <>
         <main className="p-3 mb-8">
           <h1 className="font-bold">
-            {BibleBooksData.find((b) => b.abbrEng === book)?.nameUkr}{" "}
+            {BibleBooksData.find((b) => b.abbrEng === bookName)?.nameUkr}{" "}
             {chapterNumber}
           </h1>
           {verses.map((verse, index) => (
@@ -118,7 +119,7 @@ export default function ChapterPage({
               key={index}
               onClick={() =>
                 navigator.clipboard.writeText(
-                  `${verse.verse} (${BibleBooksData.find((b) => b.abbrEng === book)?.nameUkr} ${chapterNumber}:${verse.number})`,
+                  `${verse.verse} (${BibleBooksData.find((b) => b.abbrEng === bookName)?.nameUkr} ${chapterNumber}:${verse.number})`,
                 )
               }
             >
