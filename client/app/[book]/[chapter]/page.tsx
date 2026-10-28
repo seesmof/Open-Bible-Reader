@@ -118,10 +118,6 @@ export default function ChapterPage({
     return () => removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  useEffect(() => {
-    document.title = `${BibleBooksData.find((b) => b.abbrEng === bookName)?.nameUkr} ${chapterNumber}`;
-  }, [verses]);
-
   if (isLoading) return <p className="p-3">Завантаження розділу Біблії...</p>;
   else {
     return (
