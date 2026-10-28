@@ -1,7 +1,6 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { redirect } from "next/navigation";
 import { BibleBook, BibleBooksData, CATEGORY_COLORS } from "@/data/Bible";
 import Link from "next/link";
 import bible from "../../../bible.json";
@@ -32,50 +31,41 @@ export default function ChapterPage({
   const router = useRouter();
 
   const navgiateToPreviousChapter = () => {
-    let prevChapter, prevBook;
     const currentBookIndex = BibleBooksData.findIndex(
       (b) => b.abbrEng === bookName,
     );
 
-    if (chapterNumber === 1) {
-      const prevBookObject = BibleBooksData[currentBookIndex - 1];
-
-      if (!prevBookObject) prevBook = BibleBooksData[65]?.abbrEng;
-      else prevBook = prevBookObject?.abbrEng;
-
-      prevChapter = BibleBooksData.find(
-        (b) => b.abbrEng === bookName,
-      )?.numberOfChapters;
-    } else {
-      prevChapter = chapterNumber - 1;
-      prevBook = bookName;
+    if (chapterNumber > 1) {
+      router.push(`/${bookName}/${chapterNumber - 1}`);
     }
 
-    redirect(`/${prevBook}/${prevChapter}`);
+    const prevBook =
+      currentBookIndex > 0
+        ? BibleBooksData[currentBookIndex - 1]
+        : BibleBooksData[BibleBooksData.length - 1];
+
+    if (!prevBook) return;
+
+    router.push(`/${prevBook.abbrEng}/${prevBook.numberOfChapters}`);
   };
 
   const navgiateToNextChapter = () => {
-    let nextChapter, nextBook;
-    const maxChapter = BibleBooksData.find(
-      (b) => b.abbrEng === bookName,
-    )?.numberOfChapters;
     const currentBookIndex = BibleBooksData.findIndex(
       (b) => b.abbrEng === bookName,
     );
 
-    if (chapterNumber === maxChapter) {
-      const nextBookObject = BibleBooksData[currentBookIndex + 1];
+    const currentBook = BibleBooksData[currentBookIndex];
 
-      if (!nextBookObject) nextBook = BibleBooksData[0]?.abbrEng;
-      else nextBook = nextBookObject?.abbrEng;
+    if (!currentBook) return;
 
-      nextChapter = 1;
-    } else {
-      nextChapter = chapterNumber + 1;
-      nextBook = bookName;
+    if (chapterNumber < currentBook.numberOfChapters) {
+      router.push(`/${bookName}/${chapterNumber + 1}`);
     }
 
-    redirect(`/${nextBook}/${nextChapter}`);
+    const nextBook =
+      BibleBooksData[(currentBookIndex + 1) % BibleBooksData.length];
+
+    router.push(`/${nextBook.abbrEng}/1`);
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
