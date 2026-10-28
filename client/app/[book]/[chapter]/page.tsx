@@ -4,13 +4,12 @@ import { use, useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 import { BibleBook, BibleBooksData, CATEGORY_COLORS } from "@/data/Bible";
 import Link from "next/link";
+import bible from "../../../bible.json";
 
-export interface Verse {
-  number: number;
-  verse: string;
-}
-
-export const apiUrl = "https://open-bible-api.vercel.app";
+export type Verse = {
+  verseNumber: number;
+  text: string;
+};
 
 export default function ChapterPage({
   params,
@@ -89,9 +88,14 @@ export default function ChapterPage({
   useEffect(() => {
     const fetchChapter = async () => {
       setIsLoading(true);
-      const response = await fetch(`${apiUrl}/${bookName}/${chapterNumber}`);
-      if (!response.ok) throw new Error("Failed to fetch a chapter");
-      const data: Verse[] = await response.json();
+      const chapterData = bible[bookName][chapterNumber];
+      const data: Verse[] = Object.entries(chapterData).map(
+        ([verseNumber, text]) => ({
+          verseNumber: Number(verseNumber),
+          text: text as string,
+        }),
+      );
+      console.log(data);
       setVerses(data);
       setIsLoading(false);
     };
@@ -119,12 +123,12 @@ export default function ChapterPage({
               key={index}
               onClick={() =>
                 navigator.clipboard.writeText(
-                  `${verse.verse} (${BibleBooksData.find((b) => b.abbrEng === bookName)?.nameUkr} ${chapterNumber}:${verse.number})`,
+                  `${verse.text} (${BibleBooksData.find((b) => b.abbrEng === bookName)?.nameUkr} ${chapterNumber}:${verse.verseNumber})`,
                 )
               }
             >
-              <small>{verse.number} </small>
-              <span>{verse.verse}</span>
+              <small>{verse.verseNumber} </small>
+              <span>{verse.text}</span>
             </p>
           ))}
         </main>
