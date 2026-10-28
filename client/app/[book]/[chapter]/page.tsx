@@ -30,47 +30,51 @@ export default function ChapterPage({
   const [selectedBook, setSelectedBook] = useState<BibleBook | null>(null);
   const router = useRouter();
 
-  const navgiateToPreviousChapter = () => {
+  const navigateToPreviousChapter = () => {
     const currentBookIndex = BibleBooksData.findIndex(
-      (b) => b.abbrEng === bookName,
+      (b) => b.abbrEng === book.toUpperCase(),
     );
 
-    if (chapterNumber > 1) {
-      router.push(`/${bookName}/${chapterNumber - 1}`);
-    }
-
-    const prevBook =
-      currentBookIndex > 0
-        ? BibleBooksData[currentBookIndex - 1]
-        : BibleBooksData[BibleBooksData.length - 1];
-
-    if (!prevBook) return;
-
-    router.push(`/${prevBook.abbrEng}/${prevBook.numberOfChapters}`);
-  };
-
-  const navgiateToNextChapter = () => {
-    const currentBookIndex = BibleBooksData.findIndex(
-      (b) => b.abbrEng === bookName,
-    );
+    if (currentBookIndex === -1) return;
 
     const currentBook = BibleBooksData[currentBookIndex];
 
-    if (!currentBook) return;
-
-    if (chapterNumber < currentBook.numberOfChapters) {
-      router.push(`/${bookName}/${chapterNumber + 1}`);
+    if (chapterNumber > 1) {
+      router.push(`/${currentBook.abbrEng}/${chapterNumber - 1}`);
+      return;
     }
 
-    const nextBook =
-      BibleBooksData[(currentBookIndex + 1) % BibleBooksData.length];
+    const previousBookIndex =
+      (currentBookIndex - 1 + BibleBooksData.length) % BibleBooksData.length;
+
+    const previousBook = BibleBooksData[previousBookIndex];
+
+    router.push(`/${previousBook.abbrEng}/${previousBook.numberOfChapters}`);
+  };
+
+  const navigateToNextChapter = () => {
+    const currentBookIndex = BibleBooksData.findIndex(
+      (b) => b.abbrEng === book.toUpperCase(),
+    );
+
+    if (currentBookIndex === -1) return;
+
+    const currentBook = BibleBooksData[currentBookIndex];
+
+    if (chapterNumber < currentBook.numberOfChapters) {
+      router.push(`/${currentBook.abbrEng}/${chapterNumber + 1}`);
+      return;
+    }
+
+    const nextBookIndex = (currentBookIndex + 1) % BibleBooksData.length;
+    const nextBook = BibleBooksData[nextBookIndex];
 
     router.push(`/${nextBook.abbrEng}/1`);
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key == "ArrowLeft") navgiateToPreviousChapter();
-    else if (e.key == "ArrowRight") navgiateToNextChapter();
+    if (e.key == "ArrowLeft") navigateToPreviousChapter();
+    else if (e.key == "ArrowRight") navigateToNextChapter();
     else if (e.key == "s") {
       setIsModalOpen((isModalOpen) => !isModalOpen);
       setSelectedBook(null);
@@ -133,7 +137,7 @@ export default function ChapterPage({
         </main>
         <aside className="flex justify-between fixed bottom-0 bg-white w-full">
           <button
-            onClick={navgiateToPreviousChapter}
+            onClick={navigateToPreviousChapter}
             className="hover:underline underline-offset-4 cursor-pointer sm:text-sm w-full py-2 sm:py-0 px-3 text-start"
           >
             Попередній
@@ -145,7 +149,7 @@ export default function ChapterPage({
             Розділ
           </button>
           <button
-            onClick={navgiateToNextChapter}
+            onClick={navigateToNextChapter}
             className="hover:underline underline-offset-4 cursor-pointer sm:text-sm w-full py-2 sm:py-0 px-3 text-end"
           >
             Наступний
