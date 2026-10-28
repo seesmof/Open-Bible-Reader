@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { BibleBook, BibleBooksData, CATEGORY_COLORS } from "@/data/Bible";
 import Link from "next/link";
 import bible from "../../../bible.json";
+import { useRouter } from "next/navigation";
 
 export type Verse = {
   verseNumber: number;
@@ -25,6 +26,7 @@ export default function ChapterPage({
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedBook, setSelectedBook] = useState<BibleBook | null>(null);
+  const router = useRouter();
 
   const navgiateToPreviousChapter = () => {
     let prevChapter, prevBook;
@@ -162,7 +164,15 @@ export default function ChapterPage({
                     <div
                       className={`aspect-square cursor-pointer p-1 flex items-center justify-center rounded-md text-white ${CATEGORY_COLORS[Book.category] ?? ""}`}
                       key={index}
-                      onClick={() => setSelectedBook(Book)}
+                      onClick={() => {
+                        if (Book.numberOfChapters === 1) {
+                          router.push(`/${Book.abbrEng}/1`);
+                          setIsModalOpen(false);
+                          setSelectedBook(null);
+                        } else {
+                          setSelectedBook(Book);
+                        }
+                      }}
                     >
                       {Book.abbrUkr}
                     </div>
