@@ -7,6 +7,9 @@ import Link from "next/link";
 import bible from "../../../bible.json";
 import { useRouter } from "next/navigation";
 
+type BibleData = Record<string, Record<string, Record<string, string>>>;
+const bibleData = bible as unknown as BibleData;
+
 export type Verse = {
   verseNumber: number;
   text: string;
@@ -90,14 +93,22 @@ export default function ChapterPage({
   useEffect(() => {
     const fetchChapter = async () => {
       setIsLoading(true);
-      const chapterData = bible[bookName][chapterNumber];
+
+      const chapterData = bibleData[bookName]?.[String(chapterNumber)];
+
+      if (!chapterData) {
+        setVerses([]);
+        setIsLoading(false);
+        return;
+      }
+
       const data: Verse[] = Object.entries(chapterData).map(
         ([verseNumber, text]) => ({
           verseNumber: Number(verseNumber),
           text: text as string,
         }),
       );
-      console.log(data);
+
       setVerses(data);
       setIsLoading(false);
     };
