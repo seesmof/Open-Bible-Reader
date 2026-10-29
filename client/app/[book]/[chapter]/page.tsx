@@ -163,7 +163,7 @@ export default function ChapterPage({
               {!selectedBook
                 ? BibleBooksData.map((Book, index) => (
                     <div
-                      className={`aspect-square cursor-pointer p-1 flex items-center justify-center rounded-md text-white ${CATEGORY_COLORS[Book.category] ?? ""}`}
+                      className={`aspect-square w-10 cursor-pointer p-1 flex items-center justify-center rounded-md text-white ${CATEGORY_COLORS[Book.category] ?? ""}`}
                       key={index}
                       onClick={() => {
                         if (Book.numberOfChapters === 1) {
