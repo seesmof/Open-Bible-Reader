@@ -245,7 +245,7 @@ export default function ChapterPage({
 
     if (e.key === "ArrowLeft") navigateToPreviousChapter();
     else if (e.key === "ArrowRight") navigateToNextChapter();
-    else if (e.key.toLowerCase() === "s" || e.key.toLowerCase() === "і") {
+    else if (e.key === "s") {
       setIsModalOpen((v) => !v);
       setSelectedBook(null);
     }
@@ -305,13 +305,17 @@ export default function ChapterPage({
   }, [verses]);
 
   // Search UX: focus the field when the modal opens; reset on close.
+  // Guard against hidden (display:none) inputs on mobile.
   useEffect(() => {
     if (!isModalOpen) {
       setSearchQuery("");
       setSelectedBook(null);
       return;
     }
-    const id = setTimeout(() => searchInputRef.current?.focus(), 0);
+    const id = setTimeout(() => {
+      const el = searchInputRef.current;
+      if (el && el.offsetParent !== null) el.focus();
+    }, 0);
     return () => clearTimeout(id);
   }, [isModalOpen]);
 
@@ -349,7 +353,6 @@ export default function ChapterPage({
       : `${jumpBook.nameUkr} → Показати розділи`
     : null;
 
-  // If user is searching, hide chapters view and show the filtered grid.
   const showChapters = selectedBook != null && searchQuery.trim() === "";
 
   const filteredBooks = (() => {
@@ -492,29 +495,30 @@ export default function ChapterPage({
         className={`${isModalOpen ? "fixed" : "hidden"} inset-0 bg-black/50 flex items-center justify-center p-4`}
       >
         <div className="bg-white rounded-md p-3 flex flex-col max-h-[90vh] w-[min(100%,22rem)] overflow-hidden">
-          {/* Quick search / jump field (VisioBible-style, fuzzy) */}
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={handleSearchKeyDown}
-            placeholder="Пошук: GEN 1, Буття 1, бут 1 1…"
-            className="w-full mb-3 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-700"
-            spellCheck={false}
-            autoComplete="off"
-            enterKeyHint="go"
-          />
+          {/* Quick search / jump field — larger screens only */}
+          <div className="hidden sm:block">
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              placeholder="Пошук: GEN 1, Буття 1, бут 1 1…"
+              className="w-full mb-3 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-700"
+              spellCheck={false}
+              autoComplete="off"
+              enterKeyHint="go"
+            />
 
-          {/* Live jump suggestion — chapter only (verse is shown for feedback) */}
-          {suggestionLabel && (
-            <button
-              onClick={activateSuggestion}
-              className="mb-3 text-left px-2 py-1 bg-sky-100 hover:bg-sky-200 rounded-md text-sky-900 cursor-pointer"
-            >
-              {suggestionLabel}
-            </button>
-          )}
+            {suggestionLabel && (
+              <button
+                onClick={activateSuggestion}
+                className="w-full mb-3 text-left px-2 py-1 bg-sky-100 hover:bg-sky-200 rounded-md text-sky-900 cursor-pointer"
+              >
+                {suggestionLabel}
+              </button>
+            )}
+          </div>
 
           <div className="grid grid-cols-6 gap-1 overflow-y-auto min-h-0">
             {!showChapters ? (
@@ -525,7 +529,7 @@ export default function ChapterPage({
               ) : (
                 filteredBooks.map((Book, index) => (
                   <div
-                    className={`aspect-square w-10 cursor-pointer p-1 flex items-center justify-center rounded-md text-white ${CATEGORY_COLORS[Book.category] ?? ""}`}
+                    className={`aspect-square w-full cursor-pointer p-1 flex items-center justify-center rounded-md text-white ${CATEGORY_COLORS[Book.category] ?? ""}`}
                     key={index}
                     onClick={() => {
                       if (Book.numberOfChapters === 1) {
@@ -547,7 +551,7 @@ export default function ChapterPage({
               ).map((ch, index) => (
                 <Link
                   key={index}
-                  className="aspect-square w-10 text-white bg-sky-700 hover:bg-sky-800 cursor-pointer p-1 flex items-center justify-center rounded-md"
+                  className="aspect-square w-full text-white bg-sky-700 hover:bg-sky-800 cursor-pointer p-1 flex items-center justify-center rounded-md"
                   href={`/${selectedBook!.abbrEng}/${ch}`}
                   onClick={() => {
                     setIsModalOpen(false);
