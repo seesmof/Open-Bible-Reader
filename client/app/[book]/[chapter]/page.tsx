@@ -1,6 +1,7 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { BibleBook, BibleBooksData, CATEGORY_COLORS } from "@/data/Bible";
 import Link from "next/link";
 import bible from "../../../bible.json";
@@ -71,6 +72,109 @@ function getRefText(ref: string) {
   return out.join(" ");
 }
 
+// ---------- Fuzzy matching helpers ----------
+
+function levenshtein(a: string, b: string): number {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  const prev: number[] = new Array(b.length + 1);
+  const curr: number[] = new Array(b.length + 1);
+  for (let j = 0; j <= b.length; j++) prev[j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    curr[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      curr[j] = Math.min(curr[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost);
+    }
+    for (let j = 0; j <= b.length; j++) prev[j] = curr[j];
+  }
+  return prev[b.length];
+}
+
+function similarity(a: string, b: string): number {
+  if (a.length === 0 && b.length === 0) return 1;
+  if (a.length === 0 || b.length === 0) return 0;
+  const maxLen = Math.max(a.length, b.length);
+  return 1 - levenshtein(a, b) / maxLen;
+}
+
+const FUZZY_THRESHOLD = 0.6;
+
+/**
+ * Resolve a book name (abbr or Ukrainian) to a BibleBook.
+ * Order: exact → prefix → fuzzy (full + prefix-of-id), Levenshtein based.
+ */
+function matchBookName(name: string): BibleBook | null {
+  const nameLower = name.toLowerCase().trim();
+  if (!nameLower) return null;
+
+  // 1. Exact (case-insensitive)
+  for (const book of BibleBooksData) {
+    if (
+      book.abbrEng.toLowerCase() === nameLower ||
+      book.nameUkr.toLowerCase() === nameLower
+    ) {
+      return book;
+    }
+  }
+
+  // 2. Prefix match
+  for (const book of BibleBooksData) {
+    if (
+      book.abbrEng.toLowerCase().startsWith(nameLower) ||
+      book.nameUkr.toLowerCase().startsWith(nameLower)
+    ) {
+      return book;
+    }
+  }
+
+  // 3. Fuzzy match (full string and prefix-of-id)
+  if (nameLower.length < 2) return null;
+  let best: { book: BibleBook; score: number } | null = null;
+  for (const book of BibleBooksData) {
+    for (const id of [book.abbrEng, book.nameUkr]) {
+      const idLower = id.toLowerCase();
+      const simFull = similarity(nameLower, idLower);
+      const prefixLen = Math.min(idLower.length, nameLower.length + 2);
+      const simPrefix = similarity(nameLower, idLower.slice(0, prefixLen));
+      const sim = Math.max(simFull, simPrefix);
+      if (sim >= FUZZY_THRESHOLD && (!best || sim > best.score)) {
+        best = { book, score: sim };
+      }
+    }
+  }
+  return best?.book ?? null;
+}
+
+/**
+ * Parse "GEN 1 1", "Буття 1", "бут 1", "1 Івана 3", "GEN 1:1" …
+ * Normalizes ":" and "." to spaces, then tries the shortest leading
+ * token prefix as a book name and the remaining tokens as numbers.
+ */
+function parseSearchQuery(
+  query: string,
+): { book: BibleBook; chapter?: number; verse?: number } | null {
+  const normalized = query.trim().replace(/[:.]/g, " ");
+  if (!normalized) return null;
+  const tokens = normalized.split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return null;
+
+  for (let n = 1; n <= Math.min(tokens.length, 5); n++) {
+    const numTokens = tokens.slice(n);
+    if (!numTokens.every((t) => /^\d+$/.test(t))) continue;
+    const nameCandidate = tokens.slice(0, n).join(" ");
+    const book = matchBookName(nameCandidate);
+    if (book) {
+      return {
+        book,
+        chapter: numTokens[0] ? Number(numTokens[0]) : undefined,
+        verse: numTokens[1] ? Number(numTokens[1]) : undefined,
+      };
+    }
+  }
+  return null;
+}
+
 export default function ChapterPage({
   params,
 }: {
@@ -89,6 +193,8 @@ export default function ChapterPage({
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedBook, setSelectedBook] = useState<BibleBook | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   const navigateToPreviousChapter = () => {
@@ -123,13 +229,24 @@ export default function ChapterPage({
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
+    const target = e.target as HTMLElement;
+    const isInput =
+      target.tagName === "INPUT" ||
+      target.tagName === "TEXTAREA" ||
+      target.isContentEditable;
+
+    if (e.key === "Escape") {
+      setIsModalOpen(false);
+      setSelectedBook(null);
+      return;
+    }
+
+    if (isInput) return;
+
     if (e.key === "ArrowLeft") navigateToPreviousChapter();
     else if (e.key === "ArrowRight") navigateToNextChapter();
-    else if (e.key === "s") {
+    else if (e.key.toLowerCase() === "s" || e.key.toLowerCase() === "і") {
       setIsModalOpen((v) => !v);
-      setSelectedBook(null);
-    } else if (e.key === "Escape") {
-      setIsModalOpen(false);
       setSelectedBook(null);
     }
   };
@@ -187,6 +304,17 @@ export default function ChapterPage({
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [verses]);
 
+  // Search UX: focus the field when the modal opens; reset on close.
+  useEffect(() => {
+    if (!isModalOpen) {
+      setSearchQuery("");
+      setSelectedBook(null);
+      return;
+    }
+    const id = setTimeout(() => searchInputRef.current?.focus(), 0);
+    return () => clearTimeout(id);
+  }, [isModalOpen]);
+
   const toggleVerse = (v: number) =>
     setExpandedVerses((prev) => {
       const next = new Set(prev);
@@ -200,6 +328,63 @@ export default function ChapterPage({
       next.has(key) ? next.delete(key) : next.add(key);
       return next;
     });
+
+  // ----- Search / quick-jump derived state -----
+  const parsed = parseSearchQuery(searchQuery);
+  const jumpBook = parsed?.book ?? null;
+  const jumpChapter = parsed?.chapter ?? null;
+  const jumpVerse = parsed?.verse ?? null;
+
+  const hasValidChapter =
+    jumpBook != null &&
+    jumpChapter != null &&
+    jumpChapter >= 1 &&
+    jumpChapter <= jumpBook.numberOfChapters;
+
+  const suggestionLabel: string | null = jumpBook
+    ? hasValidChapter
+      ? `${jumpBook.nameUkr} ${jumpChapter}${
+          jumpVerse != null ? ":" + jumpVerse : ""
+        } → Перейти`
+      : `${jumpBook.nameUkr} → Показати розділи`
+    : null;
+
+  // If user is searching, hide chapters view and show the filtered grid.
+  const showChapters = selectedBook != null && searchQuery.trim() === "";
+
+  const filteredBooks = (() => {
+    if (!searchQuery.trim()) return BibleBooksData;
+    if (jumpBook) return [jumpBook];
+    const q = searchQuery.trim().toLowerCase();
+    return BibleBooksData.filter(
+      (b) =>
+        b.abbrEng.toLowerCase().startsWith(q) ||
+        b.nameUkr.toLowerCase().startsWith(q),
+    );
+  })();
+
+  const goToBookChapter = (bookAbbr: string, chapter: number) => {
+    router.push(`/${bookAbbr}/${chapter}`);
+    setIsModalOpen(false);
+    setSelectedBook(null);
+    setSearchQuery("");
+  };
+
+  const activateSuggestion = () => {
+    if (!jumpBook) return;
+    if (hasValidChapter && jumpChapter != null) {
+      goToBookChapter(jumpBook.abbrEng, jumpChapter);
+    } else {
+      setSelectedBook(jumpBook);
+      setSearchQuery("");
+    }
+  };
+
+  const handleSearchKeyDown = (e: ReactKeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    activateSuggestion();
+  };
 
   if (isLoading) return <p className="p-3">Завантаження розділу Біблії...</p>;
 
@@ -304,41 +489,78 @@ export default function ChapterPage({
       </aside>
 
       <div
-        className={`${isModalOpen ? "fixed" : "hidden"} inset-0 bg-black/50 flex items-center justify-center`}
+        className={`${isModalOpen ? "fixed" : "hidden"} inset-0 bg-black/50 flex items-center justify-center p-4`}
       >
-        <div className="bg-white rounded-md p-3 flex flex-col max-h-[90vh] max-w-full overflow-hidden">
-          <div className="grid grid-cols-6 gap-1 overflow-y-auto">
-            {!selectedBook
-              ? BibleBooksData.map((Book, index) => (
+        <div className="bg-white rounded-md p-3 flex flex-col max-h-[90vh] w-[min(100%,22rem)] overflow-hidden">
+          {/* Quick search / jump field (VisioBible-style, fuzzy) */}
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            placeholder="Пошук: GEN 1, Буття 1, бут 1 1…"
+            className="w-full mb-3 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-700"
+            spellCheck={false}
+            autoComplete="off"
+            enterKeyHint="go"
+          />
+
+          {/* Live jump suggestion — chapter only (verse is shown for feedback) */}
+          {suggestionLabel && (
+            <button
+              onClick={activateSuggestion}
+              className="mb-3 text-left px-2 py-1 bg-sky-100 hover:bg-sky-200 rounded-md text-sky-900 cursor-pointer"
+            >
+              {suggestionLabel}
+            </button>
+          )}
+
+          <div className="grid grid-cols-6 gap-1 overflow-y-auto min-h-0">
+            {!showChapters ? (
+              filteredBooks.length === 0 ? (
+                <p className="col-span-6 text-sm text-gray-500">
+                  Нічого не знайдено
+                </p>
+              ) : (
+                filteredBooks.map((Book, index) => (
                   <div
                     className={`aspect-square w-10 cursor-pointer p-1 flex items-center justify-center rounded-md text-white ${CATEGORY_COLORS[Book.category] ?? ""}`}
                     key={index}
                     onClick={() => {
                       if (Book.numberOfChapters === 1) {
-                        router.push(`/${Book.abbrEng}/1`);
-                        setIsModalOpen(false);
-                        setSelectedBook(null);
+                        goToBookChapter(Book.abbrEng, 1);
                       } else {
                         setSelectedBook(Book);
+                        setSearchQuery("");
                       }
                     }}
                   >
                     {Book.abbrUkr}
                   </div>
                 ))
-              : Array.from(
-                  { length: selectedBook.numberOfChapters },
-                  (_, i) => i + 1,
-                ).map((ch, index) => (
-                  <Link
-                    key={index}
-                    className="aspect-square w-10 text-white bg-sky-700 hover:bg-sky-800 cursor-pointer p-1 flex items-center justify-center rounded-md"
-                    href={`/${selectedBook.abbrEng}/${ch}`}
-                  >
-                    {ch}
-                  </Link>
-                ))}
+              )
+            ) : (
+              Array.from(
+                { length: selectedBook!.numberOfChapters },
+                (_, i) => i + 1,
+              ).map((ch, index) => (
+                <Link
+                  key={index}
+                  className="aspect-square w-10 text-white bg-sky-700 hover:bg-sky-800 cursor-pointer p-1 flex items-center justify-center rounded-md"
+                  href={`/${selectedBook!.abbrEng}/${ch}`}
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setSelectedBook(null);
+                    setSearchQuery("");
+                  }}
+                >
+                  {ch}
+                </Link>
+              ))
+            )}
           </div>
+
           <div className="flex justify-between items-center mt-4 shrink-0">
             {selectedBook && (
               <button
