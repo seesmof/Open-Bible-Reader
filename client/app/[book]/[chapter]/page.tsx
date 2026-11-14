@@ -251,7 +251,7 @@ export default function ChapterPage({
                             <button
                               className="text-blue-600 hover:underline cursor-pointer"
                               onClick={() => toggleRef(refKey)}
-                              title={`${r.votes} votes`}
+                              title={`${r.votes} голосів`}
                             >
                               {formatRefDisplay(r.ref)}
                             </button>
