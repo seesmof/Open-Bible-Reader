@@ -11,7 +11,6 @@ const bibleData = bible as unknown as BibleData;
 
 export type Verse = { verseNumber: number; text: string };
 
-// ─── NEW: cross-reference helpers ───────────────────────────────
 type CrossRef = { ref: string; votes: number };
 
 function parseRef(ref: string) {
@@ -71,7 +70,6 @@ function getRefText(ref: string) {
   }
   return out.join(" ");
 }
-// ────────────────────────────────────────────────────────────────
 
 export default function ChapterPage({
   params,
@@ -85,7 +83,6 @@ export default function ChapterPage({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [verses, setVerses] = useState<Verse[]>([]);
 
-  // NEW: cross-reference state
   const [crossRefs, setCrossRefs] = useState<Record<string, CrossRef[]>>({});
   const [expandedVerses, setExpandedVerses] = useState<Set<number>>(new Set());
   const [expandedRefs, setExpandedRefs] = useState<Set<string>>(new Set());
@@ -162,7 +159,6 @@ export default function ChapterPage({
     // NEW: re-run when the chapter changes
   }, [bookName, chapterNumber]);
 
-  // NEW: load cross-references for the current chapter
   useEffect(() => {
     let cancelled = false;
     setCrossRefs({});
@@ -183,7 +179,6 @@ export default function ChapterPage({
     };
   }, [bookName, chapterNumber]);
 
-  // Scroll to hash after verses load (cross-reference navigation)
   useEffect(() => {
     if (verses.length === 0) return;
     const hash = window.location.hash;
@@ -243,7 +238,7 @@ export default function ChapterPage({
                     className="text-blue-600 hover:underline cursor-pointer"
                     onClick={() => toggleVerse(verse.verseNumber)}
                   >
-                    {verseOpen ? "▼" : "▶"} Cross-references ({refs.length})
+                    {verseOpen ? "▼" : "▶"} Перехресні посилання ({refs.length})
                   </button>
 
                   {verseOpen && (
@@ -262,7 +257,7 @@ export default function ChapterPage({
                             </button>
                             {open && (
                               <div className="mt-1 mb-2 ml-2 pl-2 border-l-2 border-gray-300">
-                                <span className="text-gray-700 italic">
+                                <span className="text-gray-700">
                                   {getRefText(r.ref)}
                                 </span>
                                 <div className="mt-1">
@@ -287,7 +282,6 @@ export default function ChapterPage({
         })}
       </main>
 
-      {/* ─── unchanged: footer + chapter modal ─── */}
       <aside className="flex justify-between fixed bottom-0 bg-white w-full">
         <button
           onClick={navigateToPreviousChapter}
