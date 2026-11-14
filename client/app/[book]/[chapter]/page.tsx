@@ -183,6 +183,15 @@ export default function ChapterPage({
     };
   }, [bookName, chapterNumber]);
 
+  // Scroll to hash after verses load (cross-reference navigation)
+  useEffect(() => {
+    if (verses.length === 0) return;
+    const hash = window.location.hash;
+    if (!hash) return;
+    const el = document.querySelector(hash);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [verses]);
+
   const toggleVerse = (v: number) =>
     setExpandedVerses((prev) => {
       const next = new Set(prev);
@@ -212,7 +221,11 @@ export default function ChapterPage({
           const verseOpen = expandedVerses.has(verse.verseNumber);
 
           return (
-            <div key={verse.verseNumber} className="mb-1">
+            <div
+              key={verse.verseNumber}
+              className="mb-1 scroll-mt-3"
+              id={`v${verse.verseNumber}`}
+            >
               <p
                 onClick={() =>
                   navigator.clipboard.writeText(
@@ -248,8 +261,18 @@ export default function ChapterPage({
                               {formatRefDisplay(r.ref)}
                             </button>
                             {open && (
-                              <div className="mt-1 mb-2 ml-2 pl-2 border-l-2 border-gray-300 text-gray-700 italic">
-                                {getRefText(r.ref)}
+                              <div className="mt-1 mb-2 ml-2 pl-2 border-l-2 border-gray-300">
+                                <span className="text-gray-700 italic">
+                                  {getRefText(r.ref)}
+                                </span>
+                                <div className="mt-1">
+                                  <Link
+                                    href={`/${parseRef(r.ref).book}/${parseRef(r.ref).chapter}#v${parseRef(r.ref).startVerse}`}
+                                    className="text-blue-600 hover:underline text-sm"
+                                  >
+                                    Перейти →
+                                  </Link>
+                                </div>
                               </div>
                             )}
                           </li>
