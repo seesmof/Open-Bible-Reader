@@ -416,8 +416,7 @@ export default function ChapterPage({
                   )
                 }
               >
-                <small>{verse.verseNumber} </small>
-                <span>{verse.text}</span>
+                {verse.verseNumber}. {verse.text}
               </p>
 
               {refs.length > 0 && (
