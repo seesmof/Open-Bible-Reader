@@ -1,32 +1,3 @@
-// public/sw.js
-const CACHE_NAME = "bible-app-v1";
-
-const PRECACHE = ["/", "/offline.html", "/references.json"];
-
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE)),
-  );
-
-  self.skipWaiting();
-});
-
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(
-          keys
-            .filter((key) => key !== CACHE_NAME)
-            .map((key) => caches.delete(key)),
-        ),
-      ),
-  );
-
-  self.clients.claim();
-});
-
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
@@ -35,7 +6,49 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Static files and Bible references
+  // Navigation: prefer downloaded pages.
+  if (request.mode === "navigate") {
+    event.respondWith(
+      (async () => {
+        const cache = await caches.open(CACHE_NAME);
+
+        // Ignore header differences when matching cached pages.
+        const cached = await cache.match(request, {
+          ignoreVary: true,
+        });
+
+        if (cached) return cached;
+
+        // Also try matching by URL without query parameters.
+        const pathRequest = new Request(url.origin + url.pathname);
+
+        const cachedByPath = await cache.match(pathRequest, {
+          ignoreVary: true,
+        });
+
+        if (cachedByPath) return cachedByPath;
+
+        try {
+          const response = await fetch(request);
+
+          if (response.ok) {
+            await cache.put(request, response.clone());
+          }
+
+          return response;
+        } catch {
+          return (
+            (await cache.match("/offline.html")) ||
+            new Response("Offline", { status: 503 })
+          );
+        }
+      })(),
+    );
+
+    return;
+  }
+
+  // Static files and Bible references.
   if (
     url.pathname.startsWith("/_next/static/") ||
     url.pathname === "/references.json"
@@ -58,27 +71,12 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Pages and other requests
+  // Other requests.
   event.respondWith(
-    fetch(request)
-      .then(async (response) => {
-        if (response.ok) {
-          const cache = await caches.open(CACHE_NAME);
-          await cache.put(request, response.clone());
-        }
+    fetch(request).catch(async () => {
+      const cached = await caches.match(request);
 
-        return response;
-      })
-      .catch(async () => {
-        const cached = await caches.match(request);
-
-        if (cached) return cached;
-
-        if (request.mode === "navigate") {
-          return caches.match("/offline.html");
-        }
-
-        return new Response("Offline", { status: 503 });
-      }),
+      return cached || new Response("Offline", { status: 503 });
+    }),
   );
 });
