@@ -282,10 +282,15 @@ export default function ChapterPage({
     setExpandedVerses(new Set());
     setExpandedRefs(new Set());
 
-    fetch(`/api/cross-references?book=${bookName}&chapter=${chapterNumber}`)
-      .then((r) => r.json())
+    fetch("/references.json")
+      .then((r) => {
+        if (!r.ok) throw new Error("Failed to load references");
+        return r.json();
+      })
       .then((data) => {
-        if (!cancelled) setCrossRefs(data);
+        if (!cancelled) {
+          setCrossRefs(data[`${bookName}.${chapterNumber}`] ?? {});
+        }
       })
       .catch(() => {
         if (!cancelled) setCrossRefs({});
