@@ -1,3 +1,4 @@
+// public/sw.js
 const CACHE_NAME = "bible-app-v1";
 
 const PRECACHE = ["/", "/offline.html", "/references.json"];

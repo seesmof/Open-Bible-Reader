@@ -1,3 +1,4 @@
+// data/Bible.ts
 export enum Category {
   Pentateuch = "Pentateuch",
   History = "History",
