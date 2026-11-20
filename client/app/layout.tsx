@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -16,6 +16,16 @@ export const metadata: Metadata = {
   title: "Читалка Біблії",
   description:
     "Це є дуже простий застосунок для читання Біблії в перекладі Пантелеймона Куліша.",
+  appleWebApp: {
+    capable: true,
+    title: "Читалка Біблії",
+    statusBarStyle: "default",
+  },
+  manifest: "/manifest.webmanifest",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#155dfc",
 };
 
 export default function RootLayout({
