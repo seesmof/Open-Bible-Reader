@@ -191,7 +191,9 @@ export default function ChapterPageClient({
 
   const [crossRefs, setCrossRefs] = useState<Record<string, CrossRef[]>>({});
   const [expandedVerses, setExpandedVerses] = useState<Set<number>>(new Set());
-  const [expandedRefs, setExpandedRefs] = useState<Set<string>>(new Set());
+  // One selected cross-reference per verse — its text renders in a single
+  // shared, expandable area beneath that verse's badge row.
+  const [selectedRefs, setSelectedRefs] = useState<Record<number, number>>({});
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedBook, setSelectedBook] = useState<BibleBook | null>(null);
@@ -264,7 +266,7 @@ export default function ChapterPageClient({
 
     setCrossRefs({});
     setExpandedVerses(new Set());
-    setExpandedRefs(new Set());
+    setSelectedRefs({});
 
     fetch("/references.json")
       .then((r) => {
@@ -308,17 +310,34 @@ export default function ChapterPageClient({
     return () => clearTimeout(id);
   }, [isModalOpen]);
 
-  const toggleVerse = (v: number) =>
+  const toggleVerse = (v: number) => {
+    const willClose = expandedVerses.has(v);
     setExpandedVerses((prev) => {
       const next = new Set(prev);
       next.has(v) ? next.delete(v) : next.add(v);
       return next;
     });
+    // Collapsing the verse's badge row also clears its expanded area.
+    if (willClose) {
+      setSelectedRefs((prev) => {
+        if (!(v in prev)) return prev;
+        const next = { ...prev };
+        delete next[v];
+        return next;
+      });
+    }
+  };
 
-  const toggleRef = (key: string) =>
-    setExpandedRefs((prev) => {
-      const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
+  // Toggle a single cross-reference for a verse. Only one is expanded at a
+  // time per verse; clicking the active badge collapses the shared area.
+  const selectRef = (verseNumber: number, refIndex: number) =>
+    setSelectedRefs((prev) => {
+      const next = { ...prev };
+      if (next[verseNumber] === refIndex) {
+        delete next[verseNumber];
+      } else {
+        next[verseNumber] = refIndex;
+      }
       return next;
     });
 
@@ -390,6 +409,14 @@ export default function ChapterPageClient({
           const refs = crossRefs[String(verse.verseNumber)] ?? [];
           const verseOpen = expandedVerses.has(verse.verseNumber);
 
+          const selectedRefIndex: number | undefined =
+            selectedRefs[verse.verseNumber];
+          const selectedRef =
+            selectedRefIndex !== undefined ? refs[selectedRefIndex] : undefined;
+          const selectedRefParsed = selectedRef
+            ? parseRef(selectedRef.ref)
+            : null;
+
           return (
             <div
               key={verse.verseNumber}
@@ -416,38 +443,45 @@ export default function ChapterPageClient({
                   </button>
 
                   {verseOpen && (
-                    <ul className="mt-1 ml-4 list-disc list-inside">
-                      {refs.map((r, i) => {
-                        const refKey = `${verse.verseNumber}:${i}`;
-                        const open = expandedRefs.has(refKey);
-                        return (
-                          <li key={refKey}>
+                    <>
+                      {/* Badge row — full-rounded pills, wraps to new lines */}
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {refs.map((r, i) => {
+                          const active = selectedRefIndex === i;
+                          return (
                             <button
-                              className="text-blue-600 hover:underline cursor-pointer"
-                              onClick={() => toggleRef(refKey)}
+                              key={i}
+                              onClick={() => selectRef(verse.verseNumber, i)}
                               title={`${r.votes} голосів`}
+                              className={`px-2.5 py-0.5 rounded-full text-xs border transition-colors cursor-pointer ${
+                                active
+                                  ? "bg-sky-700 text-white border-sky-700"
+                                  : "bg-sky-50 text-sky-900 border-sky-200 hover:bg-sky-100"
+                              }`}
                             >
                               {formatRefDisplay(r.ref)}
                             </button>
-                            {open && (
-                              <div className="mt-1 mb-2 ml-2 pl-2 border-l-2 border-gray-300">
-                                <span className="text-gray-700">
-                                  {getRefText(r.ref)}
-                                </span>
-                                <div className="mt-1">
-                                  <Link
-                                    href={`/${parseRef(r.ref).book}/${parseRef(r.ref).chapter}#v${parseRef(r.ref).startVerse}`}
-                                    className="text-blue-600 hover:underline text-sm"
-                                  >
-                                    Перейти →
-                                  </Link>
-                                </div>
-                              </div>
-                            )}
-                          </li>
-                        );
-                      })}
-                    </ul>
+                          );
+                        })}
+                      </div>
+
+                      {/* Single shared, expandable area below the badge row */}
+                      {selectedRef && selectedRefParsed && (
+                        <div className="mt-2 ml-2 pl-2 border-l-2 border-gray-300">
+                          <span className="text-gray-700">
+                            {getRefText(selectedRef.ref)}
+                          </span>
+                          <div className="mt-1">
+                            <Link
+                              href={`/${selectedRefParsed.book}/${selectedRefParsed.chapter}#v${selectedRefParsed.startVerse}`}
+                              className="text-blue-600 hover:underline text-sm"
+                            >
+                              Перейти →
+                            </Link>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}
